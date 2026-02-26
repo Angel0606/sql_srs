@@ -11,3 +11,8 @@ result = duckdb.query(input_text)
 st.write(input_text)
 #st.dataframe(df)
 st.dataframe(result)
+option = st.selectbox("What do you want to do?",
+                      ("JOIN", "GroupBy", "Windows Functions"),
+                      index=None,
+                      placeholder="Select a theme...")
+st.write(option)
