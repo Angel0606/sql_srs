@@ -22,18 +22,26 @@ food_items = pd.read_csv(io.StringIO(csv2))
 answer = '''
 SELECT *
 FROM beverages
-CROSS JOIN food_item
+CROSS JOIN food_items
 '''
 solution = duckdb.sql(answer)
 
+with st.sidebar:
+    option = st.selectbox(
+        "What would you like to review ?",
+        ("Joins","GroupBy","Window function"),
+        index=None,
+        placeholder="Select a theme..."
+    )
+    st.write(f"you selected {option}")
 st.header("enter your code")
-query = st.text_area("Write your SQL request here",src='user_input')
+query = st.text_area("Write your SQL request here")
 if query :
     result = duckdb.query(query)
     st.dataframe(result)
 
 tab1, tab2 = st.tabs(["Tables","Solution"])
-with tab2 :
+with tab1 :
     st.write("Table : beverages")
     st.dataframe(beverages)
     st.write("Table : food_items")
@@ -41,5 +49,5 @@ with tab2 :
     st.write("Expected")
     st.dataframe(solution)
 
-with tab1 :
+with tab2 :
     st.write(answer)
