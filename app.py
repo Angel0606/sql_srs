@@ -1,14 +1,10 @@
 import streamlit as st
 import pandas as pd
 import duckdb
-import io
 
-csv = '''
-beverage,price
-orange juice,2.5
-Expresso,2
-Tea,3
-'''
+st.write("hello world!!")
+data = {"a": [1, 2, 3], "b": [4, 5, 6]}
+df = pd.DataFrame(data)
 
 beverages = pd.read_csv(io.StringIO(csv))
 
