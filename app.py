@@ -19,7 +19,6 @@ chocolatine,2
 muffin,3
 '''
 food_items = pd.read_csv(io.StringIO(csv2))
-
 answer = '''
 SELECT *
 FROM beverages
