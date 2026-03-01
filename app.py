@@ -24,7 +24,7 @@ SELECT *
 FROM beverages
 CROSS JOIN food_items
 '''
-solution = duckdb.sql(answer)
+solution_df = duckdb.sql(answer)
 
 with st.sidebar:
     option = st.selectbox(
@@ -37,8 +37,13 @@ with st.sidebar:
 st.header("enter your code")
 query = st.text_area("Write your SQL request here")
 if query :
-    result = duckdb.query(query)
-    st.dataframe(result)
+    result_df = duckdb.query(query).df()
+    st.dataframe(result_df)
+    try :
+        result = result_df[solution_df.columns]
+        st.dataframe(result.compare(solution_df))
+    except KeyError :
+        st.write("Some columns are missing")
 
 tab1, tab2 = st.tabs(["Tables","Solution"])
 with tab1 :
