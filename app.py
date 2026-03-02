@@ -1,16 +1,19 @@
 # pylint: disable=missing-module-docstring
 import streamlit as st
 import duckdb
-import ast
+import os
+import subprocess
+import logging
+from streamlit.logger import get_logger
 
-# ANSWER = """
-# SELECT *
-# FROM beverages
-# CROSS JOIN food_items
-# """
-# solution_df = duckdb.sql(ANSWER)
 con = duckdb.connect(database="data/exercices_sql_tables.duckdb",read_only=False)
 
+app_logger = get_logger(__name__)
+app_logger.setLevel(logging.WARNING) # ici on peut mettre DEBUG, ERROR, WARNING, INFO
+
+if "exercices_sql_tables.duckb" not in os.listdir("data"):
+    app_logger.info("need to create Database and tables")
+    subprocess.run(["sys.executable", "init_db.py"])
 with st.sidebar:
     theme = st.selectbox(
         "What would you like to review ?",
@@ -20,7 +23,9 @@ with st.sidebar:
     )
     st.write(f"you selected {theme}")
     if theme:
-        exercise = con.execute(f"SELECT * FROM memory_state where theme='{theme}'").df()
+        exercise = con.execute(f"SELECT * FROM memory_state where theme='{theme}'").df()\
+            .sort_values("last_reviewed")\
+            .reset_index()
         st.write(exercise)
         EXERCISE_NAME = exercise.loc[0, "exercise_name"]
         with open(f"answer/{EXERCISE_NAME}.sql", "r") as f:
