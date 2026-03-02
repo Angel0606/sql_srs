@@ -9,6 +9,9 @@ from streamlit.logger import get_logger
 app_logger = get_logger(__name__)
 app_logger.setLevel(logging.WARNING) # ici on peut mettre DEBUG, ERROR, WARNING, INFO
 
+if "data" not in os.listdir():
+    app_logger.info("need to create data folder")
+    os.mkdir("data")
 if "exercices_sql_tables.duckb" not in os.listdir("data"):
     app_logger.info("need to create Database and tables")
     subprocess.run(["sys.executable", "init_db.py"])
