@@ -5,6 +5,7 @@ import os
 import subprocess
 import logging
 from streamlit.logger import get_logger
+import sys
 
 app_logger = get_logger(__name__)
 app_logger.setLevel(logging.WARNING) # ici on peut mettre DEBUG, ERROR, WARNING, INFO
