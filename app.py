@@ -6,14 +6,13 @@ import subprocess
 import logging
 from streamlit.logger import get_logger
 
-con = duckdb.connect(database="data/exercices_sql_tables.duckdb",read_only=False)
-
 app_logger = get_logger(__name__)
 app_logger.setLevel(logging.WARNING) # ici on peut mettre DEBUG, ERROR, WARNING, INFO
 
 if "exercices_sql_tables.duckb" not in os.listdir("data"):
     app_logger.info("need to create Database and tables")
     subprocess.run(["sys.executable", "init_db.py"])
+con = duckdb.connect(database="data/exercices_sql_tables.duckdb",read_only=False)
 with st.sidebar:
     theme = st.selectbox(
         "What would you like to review ?",
