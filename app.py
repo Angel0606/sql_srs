@@ -15,7 +15,7 @@ if "data" not in os.listdir():
     os.mkdir("data")
 if "exercices_sql_tables.duckb" not in os.listdir("data"):
     app_logger.info("need to create Database and tables")
-    subprocess.run(["sys.executable", "init_db.py"])
+    subprocess.run([f"{sys.executable}", "init_db.py"], check=False)
 con = duckdb.connect(database="data/exercices_sql_tables.duckdb",read_only=False)
 with st.sidebar:
     theme = st.selectbox(
