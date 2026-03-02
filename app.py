@@ -1,60 +1,59 @@
 # pylint: disable=missing-module-docstring
-import io
-
-import duckdb
-import pandas as pd
 import streamlit as st
+import duckdb
+import ast
 
-CSV = """
-beverage,price
-orange juice,2.5
-Expresso,2
-Tea,3
-"""
-
-beverages = pd.read_csv(io.StringIO(CSV))
-
-CSV2 = """
-food_item,food_price
-cookie juice,2.5
-chocolatine,2
-muffin,3
-"""
-food_items = pd.read_csv(io.StringIO(CSV2))
-ANSWER = """
-SELECT *
-FROM beverages
-CROSS JOIN food_items
-"""
-solution_df = duckdb.sql(ANSWER)
+# ANSWER = """
+# SELECT *
+# FROM beverages
+# CROSS JOIN food_items
+# """
+# solution_df = duckdb.sql(ANSWER)
+con = duckdb.connect(database="data/exercices_sql_tables.duckdb",read_only=False)
 
 with st.sidebar:
-    option = st.selectbox(
+    theme = st.selectbox(
         "What would you like to review ?",
-        ("Joins", "GroupBy", "Window function"),
+        ("cross_joins", "GroupBy", "window_functions"),
         index=None,
         placeholder="Select a theme...",
     )
-    st.write(f"you selected {option}")
+    st.write(f"you selected {theme}")
+    exercise = con.execute(f"SELECT * FROM memory_state where theme='{theme}'").df()
+    st.write(exercise)
 st.header("enter your code")
+
 query = st.text_area("Write your SQL request here")
 if query:
-    result_df = duckdb.query(query).df()
+    result_df = con.execute(query).df()
     st.dataframe(result_df)
-    try:
-        result = result_df[solution_df.columns]
-        st.dataframe(result.compare(solution_df))
-    except KeyError:
-        st.write("Some columns are missing")
 
 tab1, tab2 = st.tabs(["Tables", "Solution"])
 with tab1:
-    st.write("Table : beverages")
-    st.dataframe(beverages)
-    st.write("Table : food_items")
-    st.dataframe(food_items)
-    st.write("Expected")
-    st.dataframe(solution_df)
-
+    tables_concerned = exercise.loc[0,"tables"]
+    for t in tables_concerned:
+        st.write(f"table: {t}")
+        date_df = con.execute(f"SELECT * FROM {t}").df()
+        st.dataframe(date_df)
 with tab2:
-    st.write(ANSWER)
+    EXERCISE_NAME = exercise.loc[0,"exercise_name"]
+    with open(f"answer/{EXERCISE_NAME}.sql","r") as f:
+        answer = f.read()
+    st.write(answer)
+
+#     try:
+#         result = result_df[solution_df.columns]
+#         st.dataframe(result.compare(solution_df))
+#     except KeyError:
+#         st.write("Some columns are missing")
+
+
+
+#     st.write("Table : beverages")
+#     st.dataframe(beverages)
+#     st.write("Table : food_items")
+#     st.dataframe(food_items)
+#     st.write("Expected")
+#     st.dataframe(solution_df)
+#
+
