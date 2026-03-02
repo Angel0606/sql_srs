@@ -1,6 +1,7 @@
 # pylint: disable=missing-module-docstring
 import streamlit as st
 import duckdb
+import ast
 
 # ANSWER = """
 # SELECT *
@@ -23,17 +24,31 @@ with st.sidebar:
 st.header("enter your code")
 
 query = st.text_area("Write your SQL request here")
-# if query:
-#     result_df = duckdb.query(query).df()
-#     st.dataframe(result_df)
+if query:
+    result_df = con.execute(query).df()
+    st.dataframe(result_df)
+
+tab1, tab2 = st.tabs(["Tables", "Solution"])
+with tab1:
+    tables_concerned = exercise.loc[0,"tables"]
+    for t in tables_concerned:
+        st.write(f"table: {t}")
+        date_df = con.execute(f"SELECT * FROM {t}").df()
+        st.dataframe(date_df)
+with tab2:
+    EXERCISE_NAME = exercise.loc[0,"exercise_name"]
+    with open(f"answer/{EXERCISE_NAME}.sql","r") as f:
+        answer = f.read()
+    st.write(answer)
+
 #     try:
 #         result = result_df[solution_df.columns]
 #         st.dataframe(result.compare(solution_df))
 #     except KeyError:
 #         st.write("Some columns are missing")
 
-# tab1, tab2 = st.tabs(["Tables", "Solution"])
-# with tab1:
+
+
 #     st.write("Table : beverages")
 #     st.dataframe(beverages)
 #     st.write("Table : food_items")
@@ -41,5 +56,4 @@ query = st.text_area("Write your SQL request here")
 #     st.write("Expected")
 #     st.dataframe(solution_df)
 #
-# with tab2:
-#     st.write(ANSWER)
+
