@@ -19,14 +19,25 @@ with st.sidebar:
         placeholder="Select a theme...",
     )
     st.write(f"you selected {theme}")
-    exercise = con.execute(f"SELECT * FROM memory_state where theme='{theme}'").df()
-    st.write(exercise)
+    if theme:
+        exercise = con.execute(f"SELECT * FROM memory_state where theme='{theme}'").df()
+        st.write(exercise)
+        EXERCISE_NAME = exercise.loc[0, "exercise_name"]
+        with open(f"answer/{EXERCISE_NAME}.sql", "r") as f:
+            answer = f.read()
+        st.write(answer)
+        solution_df = con.execute(answer).df()
 st.header("enter your code")
 
 query = st.text_area("Write your SQL request here")
 if query:
     result_df = con.execute(query).df()
     st.dataframe(result_df)
+    try:
+        result = result_df[solution_df.columns]
+        st.dataframe(result.compare(solution_df))
+    except KeyError:
+        st.write("Some columns are missing")
 
 tab1, tab2 = st.tabs(["Tables", "Solution"])
 with tab1:
@@ -36,16 +47,9 @@ with tab1:
         date_df = con.execute(f"SELECT * FROM {t}").df()
         st.dataframe(date_df)
 with tab2:
-    EXERCISE_NAME = exercise.loc[0,"exercise_name"]
-    with open(f"answer/{EXERCISE_NAME}.sql","r") as f:
-        answer = f.read()
-    st.write(answer)
+    st.dataframe(solution_df)
 
-#     try:
-#         result = result_df[solution_df.columns]
-#         st.dataframe(result.compare(solution_df))
-#     except KeyError:
-#         st.write("Some columns are missing")
+
 
 
 
