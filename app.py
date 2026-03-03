@@ -1,32 +1,47 @@
 # pylint: disable=missing-module-docstring
 import streamlit as st
 import duckdb
-import ast
+import os
+import subprocess
+import logging
+from streamlit.logger import get_logger
+import sys
 
-# ANSWER = """
-# SELECT *
-# FROM beverages
-# CROSS JOIN food_items
-# """
-# solution_df = duckdb.sql(ANSWER)
+app_logger = get_logger(__name__)
+app_logger.setLevel(logging.WARNING) # ici on peut mettre DEBUG, ERROR, WARNING, INFO
+
+if "data" not in os.listdir():
+    app_logger.info("need to create data folder")
+    os.mkdir("data")
+if "exercices_sql_tables.duckb" not in os.listdir("data"):
+    app_logger.info("need to create Database and tables")
+    subprocess.run([f"{sys.executable}", "init_db.py"], check=False)
 con = duckdb.connect(database="data/exercices_sql_tables.duckdb",read_only=False)
-
 with st.sidebar:
+    theme_available = con.execute("SELECT DISTINCT THEME FROM memory_state").df()
+    theme_available_list = theme_available["theme"].unique()
     theme = st.selectbox(
         "What would you like to review ?",
-        ("cross_joins", "GroupBy", "window_functions"),
+        theme_available_list,
         index=None,
         placeholder="Select a theme...",
     )
     st.write(f"you selected {theme}")
     if theme:
-        exercise = con.execute(f"SELECT * FROM memory_state where theme='{theme}'").df()
-        st.write(exercise)
-        EXERCISE_NAME = exercise.loc[0, "exercise_name"]
-        with open(f"answer/{EXERCISE_NAME}.sql", "r") as f:
-            answer = f.read()
-        st.write(answer)
-        solution_df = con.execute(answer).df()
+        select_sql = f"SELECT * FROM memory_state where theme='{theme}'"
+    else:
+        select_sql = "SELECT * FROM memory_state"
+
+    exercise = con.execute(select_sql).df()\
+                .sort_values("last_reviewed")\
+                .reset_index()
+    st.write(exercise)
+EXERCISE_NAME = exercise.loc[0, "exercise_name"]
+with open(f"answer/{EXERCISE_NAME}.sql", "r") as f:
+    answer = f.read()
+st.write(answer)
+solution_df = con.execute(answer).df()
+
 st.header("enter your code")
 
 query = st.text_area("Write your SQL request here")
@@ -48,16 +63,3 @@ with tab1:
         st.dataframe(date_df)
 with tab2:
     st.dataframe(solution_df)
-
-
-
-
-
-#     st.write("Table : beverages")
-#     st.dataframe(beverages)
-#     st.write("Table : food_items")
-#     st.dataframe(food_items)
-#     st.write("Expected")
-#     st.dataframe(solution_df)
-#
-
