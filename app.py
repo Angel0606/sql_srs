@@ -26,15 +26,20 @@ with st.sidebar:
     )
     st.write(f"you selected {theme}")
     if theme:
-        exercise = con.execute(f"SELECT * FROM memory_state where theme='{theme}'").df()\
-            .sort_values("last_reviewed")\
-            .reset_index()
-        st.write(exercise)
-        EXERCISE_NAME = exercise.loc[0, "exercise_name"]
-        with open(f"answer/{EXERCISE_NAME}.sql", "r") as f:
-            answer = f.read()
-        st.write(answer)
-        solution_df = con.execute(answer).df()
+        select_sql = f"SELECT * FROM memory_state where theme='{theme}'"
+    else:
+        select_sql = "SELECT * FROM memory_state"
+
+    exercise = con.execute(select_sql).df()\
+                .sort_values("last_reviewed")\
+                .reset_index()
+    st.write(exercise)
+EXERCISE_NAME = exercise.loc[0, "exercise_name"]
+with open(f"answer/{EXERCISE_NAME}.sql", "r") as f:
+    answer = f.read()
+st.write(answer)
+solution_df = con.execute(answer).df()
+
 st.header("enter your code")
 
 query = st.text_area("Write your SQL request here")
@@ -56,16 +61,3 @@ with tab1:
         st.dataframe(date_df)
 with tab2:
     st.dataframe(solution_df)
-
-
-
-
-
-#     st.write("Table : beverages")
-#     st.dataframe(beverages)
-#     st.write("Table : food_items")
-#     st.dataframe(food_items)
-#     st.write("Expected")
-#     st.dataframe(solution_df)
-#
-
